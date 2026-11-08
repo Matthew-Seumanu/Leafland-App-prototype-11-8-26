@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#1d4a2a">
+<title>Leafland</title>
+<style>
+:root{
+  --forest:#1d4a2a; --forest-2:#2b6a3c; --leaf:#7cb342; --lime:#c5e1a5;
+  --cream:#f6f4ec; --card:#ffffff; --ink:#1c241e; --muted:#6b776e; --line:#e3e6dc;
+  --promo:#e8a33d; --red:#c0492f;
+  --safe-top:env(safe-area-inset-top,0px); --safe-bot:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--cream);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;overscroll-behavior:none}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+input,select{font:inherit}
+#app{max-width:520px;margin:0 auto;height:100%;display:flex;flex-direction:column;position:relative;background:var(--cream);overflow:hidden}
+
+/* header */
+header{background:var(--forest);color:#fff;padding:calc(var(--safe-top) + 12px) 16px 12px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.logo{display:flex;align-items:center;gap:8px;font-weight:800;letter-spacing:.18em;font-size:18px}
+.logo small{display:block;font-size:9px;letter-spacing:.2em;font-weight:500;opacity:.75}
+header .spacer{flex:1}
+.proto-badge{font-size:10px;background:var(--promo);color:#2a1c00;padding:3px 8px;border-radius:20px;font-weight:700;letter-spacing:.04em}
+
+main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:16px}
+.view{display:none}.view.active{display:block;animation:fade .2s ease}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* tab bar */
+nav.tabs{display:flex;background:#fff;border-top:1px solid var(--line);padding-bottom:var(--safe-bot);flex-shrink:0}
+nav.tabs button{flex:1;padding:8px 0 10px;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;color:var(--muted);position:relative}
+nav.tabs button svg{width:22px;height:22px}
+nav.tabs button.active{color:var(--forest);font-weight:700}
+nav.tabs .dot{position:absolute;top:4px;right:calc(50% - 18px);background:var(--red);color:#fff;font-size:9px;min-width:16px;height:16px;border-radius:8px;display:none;align-items:center;justify-content:center;padding:0 4px}
+
+.ph{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
+.tree-card .pic,.li .thumb,.cat .ic,.sheet .top .pic{position:relative;overflow:hidden}
+.cat .ic{width:56px!important;height:56px!important}
+.photo-credit{font-size:10px;color:var(--muted);text-align:center;margin:10px 0 0}
+/* home */
+.hero{background:linear-gradient(160deg,rgba(20,55,30,.92) 0%,rgba(29,74,42,.55) 100%),url('img/nursery-aerial.jpg') center/cover,var(--forest);padding-top:28px!important;padding-bottom:30px!important;color:#fff;padding:18px 18px 26px;position:relative;overflow:hidden}
+.hero h1{margin:0 0 6px;font-size:24px;line-height:1.15}
+.hero p{margin:0;opacity:.85;font-size:14px;max-width:80%}
+.hero svg.bg{position:absolute;right:-20px;bottom:-10px;width:150px;opacity:.18}
+.search-btn{margin:14px 0 0;width:100%;background:#fff;color:var(--muted);border-radius:12px;padding:12px 14px;display:flex;gap:10px;align-items:center;font-size:15px;text-align:left}
+.section-title{display:flex;justify-content:space-between;align-items:baseline;padding:20px 16px 10px}
+.section-title h2{margin:0;font-size:18px}
+.section-title button{color:var(--forest-2);font-size:13px;font-weight:600}
+
+.promo-scroll{display:flex;gap:12px;overflow-x:auto;padding:0 16px 4px;scroll-snap-type:x mandatory;scrollbar-width:none}
+.promo-scroll::-webkit-scrollbar{display:none}
+.promo-card{flex:0 0 82%;scroll-snap-align:start;border-radius:16px;padding:16px;color:#fff;position:relative;overflow:hidden;min-height:150px;display:flex;flex-direction:column;justify-content:space-between}
+.promo-card .tag{background:rgba(255,255,255,.22);display:inline-block;font-size:11px;font-weight:700;padding:3px 8px;border-radius:10px;letter-spacing:.05em}
+.promo-card h3{margin:8px 0 4px;font-size:20px}
+.promo-card p{margin:0;font-size:13px;opacity:.9}
+.promo-card>*{position:relative}.promo-card h3,.promo-card p{text-shadow:0 1px 6px rgba(0,0,0,.3)}
+.promo-card .big{position:absolute!important;right:14px;top:10px;font-size:40px;font-weight:900;opacity:.9}
+.promo-card .foot{display:flex;justify-content:space-between;align-items:center;margin-top:12px;font-size:12px}
+.promo-card .code{background:#fff;color:var(--ink);font-weight:800;padding:5px 10px;border-radius:8px;letter-spacing:.08em}
+
+.cat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:0 16px}
+.cat{background:#fff;border-radius:14px;padding:10px 4px;display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11px;font-weight:600;text-align:center;border:1px solid var(--line)}
+.cat .ic{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.cat .ic svg{width:30px;height:30px}
+
+.h-scroll{display:flex;gap:12px;overflow-x:auto;padding:0 16px 4px;scrollbar-width:none}
+.h-scroll::-webkit-scrollbar{display:none}
+.h-scroll .tree-card{flex:0 0 160px}
+
+.info-strip{margin:20px 16px 0;background:#fff;border-radius:16px;border:1px solid var(--line);padding:14px;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.info-strip div{font-size:12px;color:var(--muted)}
+.info-strip b{display:block;color:var(--ink);font-size:13px;margin-bottom:2px}
+
+/* tree cards */
+.tree-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px}
+.tree-card{background:var(--card);border-radius:14px;overflow:hidden;border:1px solid var(--line);text-align:left;display:flex;flex-direction:column;position:relative}
+.tree-card .pic{aspect-ratio:1/1;display:flex;align-items:flex-end;justify-content:center;position:relative}
+.tree-card .pic svg{width:78%;height:auto}
+.tree-card .body{padding:9px 10px 11px}
+.tree-card .bot{font-style:italic;font-size:13px;font-weight:600;line-height:1.2;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.tree-card .com{font-size:12px;color:var(--muted);margin-top:2px}
+.tree-card .price{margin-top:6px;font-size:13px;font-weight:700;color:var(--forest)}
+.tree-card .price s{color:var(--muted);font-weight:400;font-size:11px;margin-left:4px}
+.ribbon{position:absolute;top:8px;left:8px;background:var(--promo);color:#2a1c00;font-size:10px;font-weight:800;padding:3px 7px;border-radius:6px;z-index:1}
+.stock{position:absolute;top:8px;right:8px;font-size:10px;font-weight:700;padding:3px 7px;border-radius:6px;background:rgba(255,255,255,.9);z-index:1}
+.stock.low{color:var(--red)} .stock.in{color:var(--forest-2)}
+
+/* browse */
+.browse-head{position:sticky;top:0;background:var(--cream);z-index:5;padding:12px 16px 8px}
+.search{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:0 12px}
+.search input{flex:1;border:0;outline:0;padding:12px 0;background:transparent;font-size:15px}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:10px 0 2px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex-shrink:0;padding:7px 13px;border-radius:20px;background:#fff;border:1px solid var(--line);font-size:13px;font-weight:600;color:var(--muted)}
+.chip.on{background:var(--forest);color:#fff;border-color:var(--forest)}
+.toolbar{display:flex;justify-content:space-between;align-items:center;padding:6px 0 0;font-size:13px;color:var(--muted)}
+.toolbar select{border:1px solid var(--line);border-radius:8px;padding:5px 8px;background:#fff;font-size:13px}
+.empty{text-align:center;color:var(--muted);padding:50px 30px;font-size:14px}
+
+/* promos view */
+.promo-list{padding:12px 16px;display:flex;flex-direction:column;gap:12px}
+.promo-list .promo-card{flex:none;min-height:140px}
+
+/* detail sheet */
+.sheet-bg{position:absolute;inset:0;background:rgba(0,0,0,.4);opacity:0;pointer-events:none;transition:opacity .25s;z-index:40}
+.sheet-bg.open{opacity:1;pointer-events:auto}
+.sheet{position:absolute;left:0;right:0;bottom:0;top:0;background:var(--cream);z-index:50;transform:translateY(100%);transition:transform .3s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column}
+.sheet.open{transform:none}
+.sheet .top{position:relative;flex-shrink:0}
+.sheet .top .pic{height:300px;display:flex;align-items:flex-end;justify-content:center;padding-top:var(--safe-top)}
+.sheet .top .pic svg{height:88%;width:auto}
+.round-btn{position:absolute;top:calc(var(--safe-top) + 12px);width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.92);display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.12)}
+.round-btn svg{width:20px;height:20px}
+.round-btn.back{left:14px}.round-btn.fav{right:14px}
+.round-btn.fav.on svg{fill:var(--red);stroke:var(--red)}
+.sheet .scroll{flex:1;overflow-y:auto;padding:16px 16px 20px}
+.sheet h2{margin:0;font-style:italic;font-size:22px;line-height:1.2}
+.sheet .common{color:var(--muted);margin-top:4px;font-size:15px}
+.pills{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0}
+.pill{font-size:11px;font-weight:700;padding:4px 9px;border-radius:12px;background:var(--lime);color:var(--forest)}
+.desc{font-size:14px;line-height:1.55;color:#3a453c}
+.spec-title{font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--forest);margin:20px 0 8px}
+.specs{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.specs .row{display:flex;justify-content:space-between;gap:12px;padding:11px 14px;font-size:14px;border-top:1px solid var(--line)}
+.specs .row:first-child{border-top:0}
+.specs .row span:first-child{color:var(--muted)}
+.specs .row span:last-child{font-weight:600;text-align:right}
+.grades{display:flex;flex-direction:column;gap:8px}
+.grade{background:#fff;border:2px solid var(--line);border-radius:12px;padding:11px 13px;display:flex;align-items:center;gap:12px;text-align:left;width:100%}
+.grade.on{border-color:var(--forest)}
+.grade .radio{width:18px;height:18px;border-radius:50%;border:2px solid var(--line);flex-shrink:0}
+.grade.on .radio{border:5px solid var(--forest)}
+.grade .g-main{flex:1}
+.grade .g-main b{font-size:14px}
+.grade .g-main div{font-size:12px;color:var(--muted)}
+.grade .g-price{font-weight:800;color:var(--forest);text-align:right}
+.grade .g-price s{display:block;font-weight:400;color:var(--muted);font-size:11px}
+.grade.out{opacity:.5}
+.sheet .actions{flex-shrink:0;background:#fff;border-top:1px solid var(--line);padding:12px 16px calc(12px + var(--safe-bot));display:flex;gap:10px;align-items:center}
+.qty{display:flex;align-items:center;border:1px solid var(--line);border-radius:12px}
+.qty button{width:38px;height:44px;font-size:20px;color:var(--forest)}
+.qty span{min-width:22px;text-align:center;font-weight:700}
+.btn{flex:1;background:var(--forest);color:#fff;border-radius:12px;padding:13px;font-weight:700;font-size:15px}
+.btn.ghost{background:#fff;color:var(--forest);border:2px solid var(--forest)}
+.note{font-size:11px;color:var(--muted);text-align:center;margin-top:14px}
+
+/* list / saved */
+.list{padding:12px 16px;display:flex;flex-direction:column;gap:10px}
+.li{background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px;display:flex;gap:12px;align-items:center;text-align:left;width:100%}
+.li .thumb{width:62px;height:62px;border-radius:10px;display:flex;align-items:flex-end;justify-content:center;flex-shrink:0}
+.li .thumb svg{width:80%}
+.li .mid{flex:1;min-width:0}
+.li .mid .bot{font-style:italic;font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.li .mid .sub{font-size:12px;color:var(--muted)}
+.li .rm{color:var(--muted);padding:8px}
+.summary{margin:4px 16px 0;background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px}
+.summary .r{display:flex;justify-content:space-between;font-size:14px;padding:4px 0}
+.summary .r.t{font-weight:800;font-size:16px;border-top:1px solid var(--line);margin-top:6px;padding-top:10px}
+.seg{display:flex;background:#fff;border:1px solid var(--line);border-radius:12px;margin:12px 16px 0;padding:3px}
+.seg button{flex:1;padding:9px;border-radius:9px;font-weight:700;font-size:13px;color:var(--muted)}
+.seg button.on{background:var(--forest);color:#fff}
+
+/* more */
+.menu{margin:12px 16px;background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.menu .mi{display:flex;gap:12px;align-items:center;padding:14px;border-top:1px solid var(--line);font-size:14px}
+.menu .mi:first-child{border-top:0}
+.menu .mi svg{width:20px;height:20px;color:var(--forest);flex-shrink:0}
+.menu .mi div{flex:1}.menu .mi small{display:block;color:var(--muted);font-size:12px}
+.hours{width:100%;font-size:13px;border-collapse:collapse}
+.hours td{padding:5px 0}.hours td:last-child{text-align:right;font-weight:600}
+.toggle{width:44px;height:26px;border-radius:13px;background:var(--line);position:relative;transition:.2s;flex-shrink:0}
+.toggle::after{content:"";position:absolute;width:22px;height:22px;border-radius:50%;background:#fff;top:2px;left:2px;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.toggle.on{background:var(--leaf)}.toggle.on::after{left:20px}
+
+/* finder */
+.finder{padding:12px 16px}
+.finder .q{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+.finder .q h4{margin:0 0 10px;font-size:14px}
+.finder .opts{display:flex;flex-wrap:wrap;gap:8px}
+
+/* tree page (website style) */
+.sheet .round-btn{z-index:5}
+.sheet .scroll{padding:0!important}
+.gal{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;background:#dfe6d8;aspect-ratio:4/3}
+.gal::-webkit-scrollbar{display:none}
+.gal>button{flex:0 0 100%;scroll-snap-align:center;position:relative;padding:0}
+.gal img{width:100%;height:100%;object-fit:cover;display:block}
+.gal .expand{position:absolute;right:12px;bottom:12px;width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.9);display:flex;align-items:center;justify-content:center}
+.gal-count{position:absolute;left:12px;bottom:12px;background:rgba(0,0,0,.55);color:#fff;font-size:12px;padding:3px 9px;border-radius:10px}
+.thumbs{display:flex;gap:8px;padding:10px 16px 0;overflow-x:auto;scrollbar-width:none}
+.thumbs::-webkit-scrollbar{display:none}
+.thumbs button{flex:0 0 68px;height:52px;border-radius:9px;overflow:hidden;border:2px solid transparent;padding:0;opacity:.7}
+.thumbs button.on{border-color:var(--forest);opacity:1}
+.thumbs img{width:100%;height:100%;object-fit:cover}
+.dbody{padding:16px 16px 24px}
+.dbody h2{margin:0;font-style:normal;font-size:28px;font-weight:800;color:var(--forest);letter-spacing:-.01em;line-height:1.1}
+.dbody .common{font-size:17px;color:var(--muted);margin-top:4px}
+.sizecard{background:#e7ede2;border-radius:20px;padding:14px 16px;margin-top:16px;display:flex;align-items:center;gap:16px}
+.sizecard .fig{display:flex;align-items:center;gap:10px}
+.sizecard .tile{width:38px;height:38px;border-radius:12px;background:#fff;display:flex;align-items:center;justify-content:center;color:var(--forest-2)}
+.sizecard dt{font-size:10px;letter-spacing:.2em;font-weight:800;color:var(--forest-2)}
+.sizecard dd{margin:0;font-size:20px;font-weight:800;color:var(--forest)}
+.sizecard .sil{height:46px;margin-left:auto}
+.sizenote{font-size:11px;color:var(--muted);margin:6px 4px 0}
+.gradehead{display:flex;justify-content:space-between;align-items:center;margin-top:22px}
+.gradehead h3{margin:0;font-size:20px;color:var(--forest)}
+.gst-note{font-size:12px;color:var(--muted);margin:2px 0 10px}
+.grade .stockdot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px;vertical-align:1px}
+.grade .ready,.ready{font-size:11px;color:var(--muted);margin-top:2px}
+.unavail{background:#e7ede2;border-radius:18px;padding:16px;margin-top:16px}
+.unavail b{display:block;margin-bottom:4px}
+.unavail p{margin:0 0 12px;font-size:13px;color:var(--muted);line-height:1.45}
+.glance{border:1px solid var(--line);background:#fff;border-radius:18px;padding:2px 14px;margin-top:18px}
+.glance .gr,.pd .gr{display:flex;gap:12px;padding:11px 0;border-top:1px solid var(--line);align-items:flex-start}
+.glance .gr:first-child,.pd .gr:first-child{border-top:0}
+.glance .gt{flex:0 0 92px;font-size:12px;font-weight:700;color:var(--forest-2);padding-top:3px}
+.pd{border:1px solid var(--line);background:#fff;border-radius:18px;padding:2px 14px}
+.pd .gt{flex:0 0 112px;font-size:12px;font-weight:700;padding-top:3px}
+.chipset{display:flex;flex-wrap:wrap;gap:6px}
+.chip2{background:#e7ede2;color:var(--forest);border-radius:9px;padding:4px 9px;font-size:12px}
+.more-h{font-size:24px;font-weight:800;color:var(--forest);margin:28px 0 4px;line-height:1.15}
+.sub-h{font-size:16px;font-weight:800;margin:18px 0 8px}
+.season{border:1px solid var(--line);background:#fff;border-radius:18px;padding:12px 10px}
+.season .row{display:grid;grid-template-columns:62px repeat(12,1fr);align-items:center;padding:8px 0;border-top:1px solid var(--line)}
+.season .row.head{border-top:0;padding-top:0}
+.season .mo{font-size:10px;font-weight:700;color:var(--muted);text-align:center}
+.season .mo.now{background:var(--forest);color:#fff;border-radius:8px;padding:1px 0}
+.season .lab{font-size:12px;font-weight:700;line-height:1.15}
+.season .lab small{display:block;font-weight:500;color:var(--muted);font-size:10px}
+.season .cell{display:flex;justify-content:center}
+.season .dot{width:9px;height:9px;border-radius:50%;border:1px solid #fff}
+.season .dot+.dot{margin-left:-3px}
+.season .none{width:4px;height:4px;border-radius:50%;background:#d6d9d2}
+.season-note{font-size:11px;color:var(--muted);margin:8px 2px 0;line-height:1.4}
+.lb{position:absolute;inset:0;background:rgba(0,0,0,.94);z-index:120;display:none;flex-direction:column;justify-content:center}
+.lb.open{display:flex}
+.lb-track{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}
+.lb-track::-webkit-scrollbar{display:none}
+.lb-track img{flex:0 0 100%;width:100%;max-height:80vh;object-fit:contain;scroll-snap-align:center}
+.lb-x{position:absolute;top:calc(var(--safe-top) + 10px);right:14px;color:#fff;font-size:34px;width:44px;height:44px}
+.lb-count{color:#fff;text-align:center;font-size:13px;margin-top:12px}
+.btn.notify{flex:none;padding:11px 20px;font-size:14px}
+
+/* toast */
+.toast{position:absolute;left:16px;right:16px;bottom:calc(80px + var(--safe-bot));background:var(--ink);color:#fff;padding:13px 16px;border-radius:12px;font-size:14px;z-index:100;opacity:0;transform:translateY(10px);transition:.25s;pointer-events:none;text-align:center}
+.toast.show{opacity:1;transform:none}
+
+/* modal */
+.modal{position:absolute;inset:0;z-index:90;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.45);padding:24px}
+.modal.open{display:flex}
+.modal .box{background:#fff;border-radius:18px;padding:22px;max-width:360px;width:100%;text-align:center}
+.modal .box h3{margin:6px 0 8px}
+.modal .box p{margin:0 0 18px;color:var(--muted);font-size:14px;line-height:1.5}
+.modal .box .ic{width:56px;height:56px;border-radius:50%;background:var(--lime);display:flex;align-items:center;justify-content:center;margin:0 auto}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <img id="realLogo" src="img/logo.svg" alt="Leafland" style="height:52px;margin:-6px 0 -6px -6px" onload="document.getElementById('textLogo').style.display='none'" onerror="this.remove()">
+    <div class="logo" id="textLogo">
+      <svg width="28" height="28" viewBox="0 0 32 32"><path d="M16 3C8 9 6 16 9 22c2 4 5 6 7 6s5-2 7-6c3-6 1-13-7-19z" fill="#7cb342"/><path d="M16 8v22" stroke="#1d4a2a" stroke-width="2" fill="none"/><path d="M16 15l-4-3M16 20l5-4" stroke="#1d4a2a" stroke-width="1.6" fill="none"/></svg>
+      <div>LEAFLAND<small>QUALITY SPECIMEN TREES</small></div>
+    </div>
+    <div class="spacer"></div>
+    <span class="proto-badge">PROTOTYPE</span>
+  </header>
+
+  <main id="main">
+    <!-- HOME -->
+    <section class="view active" id="v-home">
+      <div class="hero">
+        
+        <h1>Trees grown tough<br>in Palmerston North</h1>
+        <p>700+ varieties of specimen trees, delivered NZ-wide.</p>
+        <button class="search-btn" onclick="go('browse',{focus:true})">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+          Search trees, e.g. Magnolia
+        </button>
+      </div>
+
+      <div class="section-title"><h2>Current promotions</h2><button onclick="go('promos')">See all</button></div>
+      <div class="promo-scroll" id="homePromos"></div>
+
+      <div class="section-title"><h2>Shop by category</h2><button onclick="go('finder')">Tree Finder</button></div>
+      <div class="cat-grid" id="cats"></div>
+
+      <div class="section-title"><h2>On special</h2><button onclick="go('browse',{special:true})">View all</button></div>
+      <div class="h-scroll" id="specialRow"></div>
+
+      <div class="section-title"><h2>Bestsellers</h2><button onclick="go('browse')">Browse</button></div>
+      <div class="h-scroll" id="bestRow"></div>
+
+      <div class="info-strip">
+        <div><b>🚚 NZ-wide delivery</b>Our own trucks, Mon–Fri</div>
+        <div><b>📍 Click &amp; collect</b>Palmerston North nursery</div>
+        <div><b>🌳 Up to 7m tall</b>Large-grade specimens</div>
+        <div><b>📞 0800 532 352</b>Expert advice</div>
+      </div>
+    </section>
+
+    <!-- BROWSE -->
+    <section class="view" id="v-browse">
+      <div class="browse-head">
+        <div class="search">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6b776e" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+          <input id="q" placeholder="Search botanical or common name" autocomplete="off">
+          <button id="qClear" style="display:none;color:#6b776e;font-size:18px">×</button>
+        </div>
+        <div class="chips" id="catChips"></div>
+        <div class="toolbar">
+          <span id="count"></span>
+          <select id="sort">
+            <option value="az">A–Z (botanical)</option>
+            <option value="price">Price: low to high</option>
+            <option value="priceD">Price: high to low</option>
+            <option value="height">Mature height</option>
+          </select>
+        </div>
+      </div>
+      <div class="tree-grid" id="grid"></div>
+    </section>
+
+    <!-- PROMOS -->
+    <section class="view" id="v-promos">
+      <div class="section-title" style="padding-bottom:0"><h2>Promotions &amp; specials</h2></div>
+      <div class="promo-list" id="promoList"></div>
+      <div class="menu">
+        <div class="mi">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 01-3.4 0"/></svg>
+          <div>Promotion alerts<small>Get notified about new specials</small></div>
+          <button class="toggle on" onclick="this.classList.toggle('on');toast(this.classList.contains('on')?'Promo alerts on (demo)':'Promo alerts off')"></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- FINDER -->
+    <section class="view" id="v-finder">
+      <div class="section-title" style="padding-bottom:0"><h2>Tree Finder</h2></div>
+      <div class="finder" id="finder"></div>
+    </section>
+
+    <!-- SAVED / QUOTE -->
+    <section class="view" id="v-saved">
+      <div class="seg"><button class="on" data-seg="quote">Quote list</button><button data-seg="fav">Favourites</button></div>
+      <div id="savedBody"></div>
+    </section>
+
+    <!-- MORE -->
+    <section class="view" id="v-more">
+      <div class="section-title" style="padding-bottom:0"><h2>Nursery info</h2></div>
+      <div class="menu">
+        <div class="mi" style="display:block">
+          <b style="font-size:14px">Opening hours</b>
+          <table class="hours" style="margin-top:8px">
+            <tr><td>Office</td><td>Mon–Fri 8am–5pm</td></tr>
+            <tr><td>Nursery open to public</td><td>Thu–Fri 8am–5pm</td></tr>
+            <tr><td>By appointment</td><td>Mon–Wed</td></tr>
+            <tr><td>Click &amp; collect</td><td>Mon–Fri</td></tr>
+            <tr><td>Weekends &amp; public holidays</td><td>Closed</td></tr>
+          </table>
+        </div>
+      </div>
+      <div class="menu">
+        <button class="mi" style="width:100%;text-align:left" onclick="demo('Calling is disabled in the prototype')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3.1 19.5 19.5 0 01-6-6A19.8 19.8 0 012.1 4.2 2 2 0 014.1 2h3a2 2 0 012 1.7c.1.9.4 1.8.7 2.7a2 2 0 01-.5 2.1L8 9.8a16 16 0 006 6l1.3-1.3a2 2 0 012.1-.4c.9.3 1.8.6 2.7.7a2 2 0 011.7 2z"/></svg>
+          <div>Call us<small>0800 532 352</small></div>
+        </button>
+        <button class="mi" style="width:100%;text-align:left" onclick="demo('Email is disabled in the prototype')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 6l-10 7L2 6"/></svg>
+          <div>Email sales<small>sales@leafland.co.nz</small></div>
+        </button>
+        <button class="mi" style="width:100%;text-align:left" onclick="demo('Booking is disabled in the prototype')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          <div>Book a nursery visit<small>Mon–Wed appointments</small></div>
+        </button>
+        <div class="mi">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <div>Nursery sites<small>1 Roberts Line &amp; 710 Napier Road, Palmerston North</small></div>
+        </div>
+        <div class="mi">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+          <div>Delivery<small>Own trucks, weekly routes to major centres, Mon–Fri</small></div>
+        </div>
+      </div>
+      <p class="note" style="padding:0 30px">Prototype build · photos &amp; logo from leafland.co.nz (stored in the app, work offline) · sample stock &amp; prices only · no orders are placed from this app.</p>
+    </section>
+  </main>
+
+  <nav class="tabs" id="tabs">
+    <button data-v="home" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10l9-7 9 7v10a2 2 0 01-2 2h-4v-7H9v7H5a2 2 0 01-2-2z"/></svg>Home</button>
+    <button data-v="browse"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="9" r="6"/><path d="M12 15v7M9 22h6"/></svg>Trees</button>
+    <button data-v="promos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.6 13.4l-7.2 7.2a2 2 0 01-2.8 0L2 12V2h10l8.6 8.6a2 2 0 010 2.8z"/><circle cx="7" cy="7" r="1.5"/></svg>Promos</button>
+    <button data-v="saved"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2M9 12h6M9 16h4"/></svg>Quote<span class="dot" id="qDot"></span></button>
+    <button data-v="more"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>Info</button>
+  </nav>
+
+  <!-- detail sheet -->
+  <div class="sheet-bg" id="sheetBg"></div>
+  <div class="sheet" id="sheet">
+    <button class="round-btn back" onclick="closeSheet()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 18l-6-6 6-6"/></svg></button>
+    <button class="round-btn fav" id="dFav"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 000-7.8z"/></svg></button>
+    <div class="scroll" id="dScroll">
+      <div class="gal" id="dGal"></div>
+      <div class="thumbs" id="dThumbs"></div>
+      <div id="dBody" class="dbody"></div>
+    </div>
+    <div class="actions" id="dActions">
+      <div class="qty"><button onclick="setQty(-1)">−</button><span id="dQty">1</span><button onclick="setQty(1)">+</button></div>
+      <button class="btn" id="dAdd">Add to quote list</button>
+    </div>
+  </div>
+
+  <div class="lb" id="lb" onclick="if(event.target===this||event.target.classList.contains('lb-x'))this.classList.remove('open')">
+    <button class="lb-x">×</button><div class="lb-track" id="lbTrack"></div><div class="lb-count" id="lbCount"></div>
+  </div>
+
+  <div class="modal" id="modal"><div class="box">
+    <div class="ic"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1d4a2a" stroke-width="2.4"><path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg></div>
+    <h3 id="mTitle">Prototype only</h3>
+    <p id="mText">Ordering is switched off in this prototype. No order or enquiry has been sent.</p>
+    <button class="btn" style="width:100%" onclick="document.getElementById('modal').classList.remove('open')">Got it</button>
+  </div></div>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script src="data.js"></script>
+<script>
+/* ---------------- DATA (sample / placeholder) ---------------- */
+const MEDIA='https://leafland.co.nz/media/';
+const CATS = [
+  {id:'flowering', name:'Flowering', color:'#f3c4d6', leaf:'#e88fb0', img:'33978202781_25170e2d45_4k-scaled.avif'},
+  {id:'autumn', name:'Autumn Colour', color:'#f8d3b0', leaf:'#d9682b', img:'quercus-palustris-9.avif'},
+  {id:'evergreen', name:'Evergreen', color:'#cfe5c4', leaf:'#2f7d3a', img:'alectryon-excelsus.avif'},
+  {id:'native', name:'Natives', color:'#d6e8d0', leaf:'#4f8a3c', img:'metrosideros-excelsa-vibrance.avif'},
+  {id:'citrus', name:'Citrus & Fruit', color:'#fbe6a6', leaf:'#5d9c35', img:'citrus-x-meyeri.avif'},
+  {id:'driveway', name:'Driveway', color:'#dde7d3', leaf:'#5f9442', img:'cupressus-sempervirens-stricta.avif'},
+  {id:'screening', name:'Screening', color:'#c9dfc6', leaf:'#2d6b34', img:'cupressus-x-ovensii.avif'},
+  {id:'small', name:'Small Garden', color:'#e6dcf0', leaf:'#8a5fb5', img:'acer-palmatum-bloodgood-japanese-maple.avif'},
+];
+// Built from data.js (scraped from leafland.co.nz plant pages). Prices exclude GST.
+const parseM=x=>parseFloat(String(x).replace(/[^\d.]/g,''))||0;
+const TREES = TREE_DATA.map(r=>{
+  const det=Object.fromEntries(r.details.map(d=>[d[0],d[1]]));
+  const crown=(det['Crown Form']||[]).join(' ').toLowerCase();
+  const shape=/column|fastigiate/.test(crown)?'column':/conical|pyramid/.test(crown)?'cone':/vase/.test(crown)?'vase':/spread|umbrella/.test(crown)?'umbrella':'round';
+  return {...r, det, type:(det['Foliage Type']||[''])[0], hm:parseM(r.h), shape, img:r.gallery[0],
+    grades:r.grades.map(g=>({...g,ok:g.stock==='ready'||g.stock==='low'}))};
+});
+const PROMOS = [
+  {id:'P1',title:'Spring Flowering Sale',text:'Up to 20% off selected flowering trees including Amelanchier.',big:'20%',code:'BLOSSOM20',ends:'30 Nov 2026',tint:'rgba(150,40,85,.88),rgba(194,85,125,.55)',img:CATS[0].img,cat:'flowering'},
+  {id:'P2',title:'Native Week',text:'25% off Kōwhai and Pittosporum. Bring the birds back.',big:'25%',code:'NATIVE25',ends:'22 Nov 2026',tint:'rgba(20,60,32,.9),rgba(60,120,50,.5)',img:'sophora-microphylla-south-island-kowhai.avif',cat:'native'},
+  {id:'P3',title:'Free delivery',text:'Free freight to Manawatū on quotes over $1,500.',big:'🚚',code:'FREEFREIGHT',ends:'31 Dec 2026',tint:'rgba(25,60,85,.9),rgba(40,100,140,.5)',imgUrl:'img/nursery-aerial.jpg',cat:null},
+  {id:'P4',title:'Japanese Maple Week',text:'15% off Bloodgood and other selected maples.',big:'15%',code:'MAPLE15',ends:'15 Dec 2026',tint:'rgba(130,45,15,.9),rgba(220,120,50,.45)',img:'acer-palmatum-bloodgood-japanese-maple-back-garden.avif',cat:'small'},
+];
+
+/* ---------------- FREIGHT (sample rates) ---------------- */
+const GST_RATE=0.15;
+const REGIONS=[
+  ['manawatu','Manawatū / Whanganui',45],['wellington','Wellington / Kāpiti',85],['wairarapa','Wairarapa',85],
+  ['hawkesbay',"Hawke's Bay",95],['taranaki','Taranaki',95],['waikato','Waikato',120],['bop','Bay of Plenty',130],
+  ['gisborne','Gisborne',140],['auckland','Auckland',150],['northland','Northland',190],['southisland','South Island',220],
+];
+const FREE_FREIGHT={region:'manawatu',over:1500}; // matches FREEFREIGHT promo
+function perTreeFreight(bag){ // extra charge per tree by bag size
+  if(/^P/.test(bag))return 6;
+  const l=parseInt(bag); if(l<=45)return 15; if(l<=80)return 30; return 60;
+}
+
+/* ---------------- STATE ---------------- */
+const store = {
+  get(k,d){try{return JSON.parse(localStorage.getItem('lf_'+k))??d}catch(e){return d}},
+  set(k,v){try{localStorage.setItem('lf_'+k,JSON.stringify(v))}catch(e){}}
+};
+let favs = store.get('favs',[]);
+let quote = store.get('quote',[]); // {id,grade,qty}
+let ship = store.get('ship',{method:'delivery',region:'manawatu'});
+let filter = {cat:'all',q:'',sort:'az',special:false};
+let current=null, curGrade=0, curQty=1, savedSeg='quote';
+const finder = {cat:null,size:null,type:null};
+
+/* ---------------- HELPERS ---------------- */
+const $=s=>document.querySelector(s);
+const money=n=>'$'+n.toLocaleString('en-NZ',{minimumFractionDigits:0,maximumFractionDigits:0});
+const money2=n=>'$'+n.toLocaleString('en-NZ',{minimumFractionDigits:2,maximumFractionDigits:2});
+const catOf=id=>CATS.find(c=>c.id===id);
+const minPrice=t=>{const ok=t.grades.filter(g=>g.ok);return ok.length?Math.min(...ok.map(g=>g.price)):null};
+const moneyP=n=>Number.isInteger(Math.round(n*100)/100)?money(n):money2(n);
+const sale=(t,p)=>t.special?Math.round(p*(1-t.special/100)*100)/100:p;
+
+function treeSVG(t){
+  const c=catOf(t.cats[0]); const L=c.leaf; const trunk='#6b4a2f';
+  const dark=shade(L,-25), light=shade(L,25);
+  let crown='';
+  switch(t.shape){
+    case 'column': crown=`<ellipse cx="50" cy="48" rx="20" ry="40" fill="${L}"/><ellipse cx="44" cy="40" rx="10" ry="22" fill="${light}" opacity=".6"/>`;break;
+    case 'cone': crown=`<path d="M50 6 L80 82 Q50 90 20 82Z" fill="${L}"/><path d="M50 14 L62 60 Q50 64 40 58Z" fill="${light}" opacity=".5"/>`;break;
+    case 'vase': crown=`<ellipse cx="50" cy="40" rx="42" ry="28" fill="${L}"/><circle cx="30" cy="36" r="14" fill="${light}" opacity=".55"/><circle cx="68" cy="30" r="12" fill="${dark}" opacity=".35"/>`;break;
+    case 'umbrella': crown=`<ellipse cx="50" cy="38" rx="46" ry="20" fill="${L}"/><ellipse cx="38" cy="32" rx="18" ry="8" fill="${light}" opacity=".6"/>`;break;
+    default: crown=`<circle cx="50" cy="42" r="34" fill="${L}"/><circle cx="38" cy="32" r="14" fill="${light}" opacity=".55"/><circle cx="64" cy="52" r="12" fill="${dark}" opacity=".3"/>`;
+  }
+  const trunkH = t.shape==='column'||t.shape==='cone'?'M47 80 L47 110 L53 110 L53 80Z':'M46 60 L44 110 L56 110 L54 60Z';
+  const bag=`<path d="M30 108 L70 108 L66 124 L34 124Z" fill="#2a2a2a"/><path d="M30 108 L70 108 L69 112 L31 112Z" fill="#444"/>`;
+  return `<svg viewBox="0 0 100 126"><path d="${trunkH}" fill="${trunk}"/>${crown}${bag}</svg>`;
+}
+function imgPath(file){return 'img/'+file.replace(/\.avif$/,'.jpg')}
+function photo(file){return file?`<img class="ph" src="${file.startsWith('img/')?file:imgPath(file)}" alt="" loading="lazy" onerror="this.remove()">`:''}
+function shade(hex,p){let n=parseInt(hex.slice(1),16),r=(n>>16)+p,g=((n>>8)&255)+p,b=(n&255)+p;
+  r=Math.max(0,Math.min(255,r));g=Math.max(0,Math.min(255,g));b=Math.max(0,Math.min(255,b));
+  return '#'+((1<<24)+(r<<16)+(g<<8)+b).toString(16).slice(1)}
+function catIcon(c){return `<svg viewBox="0 0 30 30"><circle cx="15" cy="12" r="9" fill="${c.leaf}"/><rect x="13.5" y="18" width="3" height="10" fill="#6b4a2f"/></svg>`}
+
+function stockLabel(t){
+  const ok=t.grades.filter(g=>g.ok);
+  if(!ok.length)return t.grades.length?'<span class="stock low">In production</span>':'<span class="stock low">Unavailable</span>';
+  if(ok.every(g=>g.stock==='low'))return '<span class="stock low">Low stock</span>';
+  return '<span class="stock in">In stock</span>';
+}
+function card(t){
+  const c=catOf(t.cats[0]); const p=minPrice(t);
+  return `<button class="tree-card" onclick="openTree(${t.id})">
+    ${t.special?`<span class="ribbon">-${t.special}%</span>`:''}${stockLabel(t)}
+    <div class="pic" style="background:${c.color}">${treeSVG(t)}${photo(t.img)}</div>
+    <div class="body"><div class="bot">${t.bot}</div><div class="com">${t.com}</div>
+    <div class="price">${p==null?'<span style="color:var(--muted);font-weight:600">Not available now</span>':`from ${moneyP(sale(t,p))}${t.special?`<s>${moneyP(p)}</s>`:''} <small style="font-weight:500;color:var(--muted)">+GST</small>`}</div></div></button>`;
+}
+function promoCard(p){
+  const u=p.imgUrl||imgPath(p.img);
+  return `<div class="promo-card" style="background:linear-gradient(135deg,${p.tint}),url('${u}') center/cover,${p.tint.split('),')[0]+')'}">
+    <div class="big">${p.big}</div>
+    <div><span class="tag">PROMOTION</span><h3>${p.title}</h3><p>${p.text}</p></div>
+    <div class="foot"><span>Ends ${p.ends}</span><button class="code" onclick="copyCode('${p.code}')">${p.code}</button></div>
+    ${p.cat?`<button style="color:#fff;font-weight:700;font-size:13px;text-align:left;margin-top:8px" onclick="go('browse',{cat:'${p.cat}'})">Shop trees →</button>`:''}
+  </div>`;
+}
+
+/* ---------------- RENDER ---------------- */
+function renderHome(){
+  $('#homePromos').innerHTML=PROMOS.map(promoCard).join('');
+  $('#cats').innerHTML=CATS.map(c=>`<button class="cat" onclick="go('browse',{cat:'${c.id}'})"><span class="ic" style="background:${c.color}">${catIcon(c)}${photo(c.img,320,'square')}</span>${c.name}</button>`).join('');
+  $('#specialRow').innerHTML=TREES.filter(t=>t.special).map(card).join('');
+  $('#bestRow').innerHTML=TREES.filter(t=>t.best).map(card).join('');
+}
+function renderChips(){
+  const all=[{id:'all',name:'All'},{id:'special',name:'On special'},...CATS];
+  $('#catChips').innerHTML=all.map(c=>{
+    const on=c.id==='special'?filter.special:(!filter.special&&filter.cat===c.id);
+    return `<button class="chip ${on?'on':''}" data-c="${c.id}">${c.name}</button>`}).join('');
+}
+function renderGrid(){
+  let list=TREES.filter(t=>{
+    if(filter.special&&!t.special)return false;
+    if(!filter.special&&filter.cat!=='all'&&!t.cats.includes(filter.cat))return false;
+    if(filter.q){const q=filter.q.toLowerCase();if(!(t.bot+' '+t.com).toLowerCase().includes(q))return false}
+    return true});
+  const s=filter.sort;
+  const mp=t=>{const p=minPrice(t);return p==null?null:sale(t,p)};
+  list.sort((a,b)=>s==='price'?(mp(a)??1e9)-(mp(b)??1e9):s==='priceD'?(mp(b)??-1)-(mp(a)??-1):s==='height'?b.hm-a.hm:a.bot.localeCompare(b.bot));
+  $('#count').textContent=list.length+' tree'+(list.length===1?'':'s');
+  $('#grid').innerHTML=list.length?list.map(card).join(''):`<div class="empty" style="grid-column:1/-1">No trees match. Try another search or category.</div>`;
+}
+function renderPromos(){ $('#promoList').innerHTML=PROMOS.map(promoCard).join(''); }
+
+function renderFinder(){
+  const q=(title,key,opts)=>`<div class="q"><h4>${title}</h4><div class="opts">${opts.map(o=>`<button class="chip ${finder[key]===o[0]?'on':''}" onclick="setFinder('${key}','${o[0]}')">${o[1]}</button>`).join('')}</div></div>`;
+  const res=TREES.filter(t=>(!finder.cat||t.cats.includes(finder.cat))&&(!finder.type||(finder.type==='ever'?t.type.includes('vergreen'):t.type==='Deciduous'))&&
+    (!finder.size||(finder.size==='s'?t.hm<=4:finder.size==='m'?t.hm>4&&t.hm<=6:t.hm>6)));
+  $('#finder').innerHTML=
+    q('What is it for?','cat',CATS.map(c=>[c.id,c.name]))+
+    q('Height at 10 years','size',[['s','Up to 4m'],['m','5–6m'],['l','7m+']])+
+    q('Leaves','type',[['ever','Evergreen'],['dec','Deciduous']])+
+    `<div class="section-title" style="padding:6px 0 10px"><h2>${res.length} match${res.length===1?'':'es'}</h2><button onclick="finder.cat=finder.size=finder.type=null;renderFinder()">Reset</button></div>
+     <div class="tree-grid" style="padding:0">${res.map(card).join('')||'<div class="empty" style="grid-column:1/-1">No matches, try loosening a filter.</div>'}</div>`;
+}
+function setFinder(k,v){finder[k]=finder[k]===v?null:v;renderFinder()}
+
+function renderSaved(){
+  document.querySelectorAll('.seg button').forEach(b=>b.classList.toggle('on',b.dataset.seg===savedSeg));
+  const el=$('#savedBody');
+  if(savedSeg==='fav'){
+    const list=TREES.filter(t=>favs.includes(t.id));
+    el.innerHTML=list.length?`<div class="list">${list.map(t=>`<button class="li" onclick="openTree(${t.id})">
+      <span class="thumb" style="background:${catOf(t.cats[0]).color}">${treeSVG(t)}${photo(t.img)}</span>
+      <span class="mid"><div class="bot">${t.bot}</div><div class="sub">${t.com} · ${minPrice(t)==null?'not available now':'from '+moneyP(sale(t,minPrice(t)))+' +GST'}</div></span></button>`).join('')}</div>`
+      :`<div class="empty">♡<br><br>Tap the heart on any tree to save it here.</div>`;
+    return;
+  }
+  if(!quote.length){el.innerHTML=`<div class="empty">Your quote list is empty.<br><br><button class="btn" style="flex:none;padding:11px 22px" onclick="go('browse')">Browse trees</button></div>`;return}
+  let sub=0,saveAmt=0,count=0,extra=0;
+  quote=quote.filter(q=>{const t=TREES.find(x=>x.id===q.id);return t&&t.grades[q.grade]&&t.grades[q.grade].ok});
+  const rows=quote.map((q,i)=>{const t=TREES.find(x=>x.id===q.id);const g=t.grades[q.grade];
+    const each=sale(t,g.price);sub+=each*q.qty;saveAmt+=(g.price-each)*q.qty;count+=q.qty;extra+=perTreeFreight(g.g)*q.qty;
+    return `<div class="li"><span class="thumb" style="background:${catOf(t.cats[0]).color}" onclick="openTree(${t.id})">${treeSVG(t)}${photo(t.img)}</span>
+      <span class="mid"><div class="bot">${t.bot}</div><div class="sub">${g.g}${g.h?' · '+g.h:''} · ${moneyP(each)} ea +GST</div>
+      <div class="qty" style="display:inline-flex;margin-top:6px"><button style="height:30px;width:30px" onclick="qQty(${i},-1)">−</button><span>${q.qty}</span><button style="height:30px;width:30px" onclick="qQty(${i},1)">+</button></div></span>
+      <b style="font-size:14px">${moneyP(each*q.qty)}</b></div>`}).join('');
+  const reg=REGIONS.find(r=>r[0]===ship.region)||REGIONS[0];
+  let freight=0, freightLabel='';
+  if(ship.method==='pickup'){freight=0;freightLabel='Pickup – Palmerston North'}
+  else if(reg[0]===FREE_FREIGHT.region&&sub>=FREE_FREIGHT.over){freight=0;freightLabel='Free (FREEFREIGHT)'}
+  else {freight=reg[2]+extra;freightLabel=reg[1]}
+  const exGst=sub+freight;
+  const gst=Math.round(exGst*GST_RATE*100)/100;
+  const total=exGst+gst;
+  const toFree=(ship.method==='delivery'&&reg[0]===FREE_FREIGHT.region&&sub<FREE_FREIGHT.over)?FREE_FREIGHT.over-sub:0;
+  el.innerHTML=`<div class="list">${rows}</div>
+    <div class="summary">
+      <div style="font-weight:800;font-size:14px;margin-bottom:8px">Delivery</div>
+      <div class="seg" style="margin:0 0 10px"><button class="${ship.method==='delivery'?'on':''}" onclick="setShip('method','delivery')">🚚 Delivery</button><button class="${ship.method==='pickup'?'on':''}" onclick="setShip('method','pickup')">📍 Pickup (free)</button></div>
+      ${ship.method==='delivery'?`<select onchange="setShip('region',this.value)" style="width:100%;padding:11px;border:1px solid var(--line);border-radius:10px;background:#fff;font-size:14px;margin-bottom:6px">
+        ${REGIONS.map(r=>`<option value="${r[0]}" ${r[0]===ship.region?'selected':''}>${r[1]} – from ${money(r[2])}</option>`).join('')}</select>
+        <div style="font-size:12px;color:var(--muted)">Our own trucks, Mon–Fri. ${money(reg[2])} minimum + per-tree charge by bag size (excl. GST).</div>
+        ${toFree?`<div style="font-size:12px;color:var(--forest-2);font-weight:700;margin-top:6px">Add ${money(toFree)} more for free Manawatū delivery</div>`:''}`
+      :`<div style="font-size:12px;color:var(--muted)">Click &amp; collect Mon–Fri from 1 Roberts Line, Palmerston North.</div>`}
+    </div>
+    <div class="summary" style="margin-top:10px">
+      <div class="r"><span>Trees (${count})</span><span>${money2(sub+saveAmt)}</span></div>
+      ${saveAmt?`<div class="r" style="color:var(--forest-2)"><span>Promo savings</span><span>−${money2(saveAmt)}</span></div>`:''}
+      <div class="r"><span>Freight <small style="color:var(--muted)">· ${freightLabel}</small></span><span>${money2(freight)}</span></div>
+      <div class="r" style="font-weight:700"><span>Subtotal excl. GST</span><span>${money2(exGst)}</span></div>
+      <div class="r"><span>+ GST (15%)</span><span>${money2(gst)}</span></div>
+      <div class="r t"><span>Total incl. GST</span><span>${money2(total)}</span></div>
+    </div>
+    <div style="padding:14px 16px;display:flex;flex-direction:column;gap:10px">
+      <button class="btn" onclick="blocked()">Request quote</button>
+      <button class="btn ghost" onclick="quote=[];persist();renderSaved();toast('Quote list cleared')">Clear list</button>
+      <p class="note" style="margin:0">Prototype: requests are not sent. Tree prices from leafland.co.nz (excl. GST). Freight rates and promo discounts are samples.</p>
+    </div>`;
+}
+function setShip(k,v){ship[k]=v;persist();renderSaved()}
+function qQty(i,d){quote[i].qty+=d;if(quote[i].qty<1)quote.splice(i,1);persist();renderSaved()}
+
+/* ---------------- DETAIL ---------------- */
+const MONTHS=['J','F','M','A','M','J','J','A','S','O','N','D'];
+function openTree(id){
+  const t=TREES.find(x=>x.id===id);current=t;curQty=1;
+  curGrade=t.grades.findIndex(g=>g.ok);
+  $('#dFav').classList.toggle('on',favs.includes(id));
+  const pics=t.gallery;
+  $('#dGal').innerHTML=pics.length?pics.map((p,i)=>`<button onclick="openLB(${i})"><img src="${p}" alt="">
+    <span class="expand"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1d4a2a" stroke-width="2.4"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg></span>
+    ${pics.length>1?`<span class="gal-count">${i+1} / ${pics.length}</span>`:''}</button>`).join('')
+    :`<button style="background:${catOf(t.cats[0]).color};display:flex;align-items:flex-end;justify-content:center">${treeSVG(t)}</button>`;
+  $('#dThumbs').innerHTML=pics.length>1?pics.map((p,i)=>`<button class="${i?'':'on'}" onclick="galTo(${i})"><img src="${p}" alt=""></button>`).join(''):'';
+  $('#dThumbs').style.display=pics.length>1?'flex':'none';
+  $('#dGal').onscroll=()=>{const i=Math.round($('#dGal').scrollLeft/$('#dGal').clientWidth);
+    document.querySelectorAll('#dThumbs button').forEach((b,j)=>b.classList.toggle('on',i===j))};
+  $('#dGal').scrollLeft=0;
+  renderDetail();
+  $('#dQty').textContent=1;
+  $('#sheet').classList.add('open');$('#sheetBg').classList.add('open');
+  $('#dScroll').scrollTop=0;
+}
+function galTo(i){const g=$('#dGal');g.scrollTo({left:i*g.clientWidth,behavior:'smooth'})}
+function openLB(i){
+  const pics=current.gallery; if(!pics.length)return;
+  $('#lbTrack').innerHTML=pics.map(p=>`<img src="${p}" alt="">`).join('');
+  $('#lb').classList.add('open');
+  const tr=$('#lbTrack'); tr.scrollLeft=i*tr.clientWidth;
+  const upd=()=>{$('#lbCount').textContent=(Math.round(tr.scrollLeft/tr.clientWidth)+1)+' / '+pics.length};
+  tr.onscroll=upd; upd();
+}
+function chipsH(arr){return `<div class="chipset">${arr.map(c=>`<span class="chip2">${c}</span>`).join('')}</div>`}
+function renderDetail(){
+  const t=current;
+  const ok=t.grades.filter(g=>g.ok);
+  const prod=t.grades.filter(g=>!g.ok);
+  const size=`<div class="sizecard">
+      <div class="fig"><span class="tile"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M8 7l4-4 4 4M8 17l4 4 4-4M12 3v18"/></svg></span><dl style="margin:0"><dt>HEIGHT</dt><dd>${t.h||'–'}</dd></dl></div>
+      <div class="fig"><span class="tile"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M7 8l-4 4 4 4M17 8l4 4-4 4M3 12h18"/></svg></span><dl style="margin:0"><dt>WIDTH</dt><dd>${t.w||'–'}</dd></dl></div>
+      ${t.sil?`<img class="sil" src="${t.sil}" alt="">`:''}
+    </div><p class="sizenote">Estimated size at 10 years</p>`;
+  let buy;
+  if(ok.length){
+    buy=`<div class="gradehead"><h3>Choose a grade</h3>${t.special?`<span class="pill" style="background:var(--promo);color:#2a1c00;margin:0">${t.special}% OFF</span>`:''}</div>
+    <p class="gst-note">All prices exclude GST. No payment is taken.</p>
+    <div class="grades">${t.grades.map((g,i)=>!g.ok?'':`<button class="grade ${i===curGrade?'on':''}" onclick="pickGrade(${i})">
+      <span class="radio"></span><span class="g-main"><b>${g.g}</b>${g.h?` <span style="color:var(--muted);font-size:13px">· ${g.h}</span>`:''}
+        <div><span class="stockdot" style="background:${g.stock==='low'?'#e8a33d':'#4caf50'}"></span>${g.stockText}</div>
+        ${g.ready?`<div class="ready">${g.ready}</div>`:''}</span>
+      <span class="g-price">${moneyP(sale(t,g.price))}${t.special?`<s>${moneyP(g.price)}</s>`:''}</span></button>`).join('')}
+      ${prod.length?`<div class="ready" style="padding:4px 4px 0">Coming soon: ${prod.map(g=>`${g.g} (${g.stockText}, ${g.ready.replace('Ready approx. ','ready ')})`).join(' · ')}</div>`:''}
+    </div>`;
+  } else {
+    buy=`<div class="unavail"><b>🔔 Email me when it's back</b><p>${t.bot} can't be ordered right now.${prod.length?' '+prod.map(g=>`${g.g}: ${g.stockText}, ${g.ready.toLowerCase()}`).join('; ')+'.':''} Leave your email and we'll let you know when it's available again.</p>
+      <button class="btn notify" onclick="demo('Notifications are disabled in the prototype')">🔔 Notify me</button></div>`;
+  }
+  const gl=[];
+  if(t.aka.length)gl.push(['Also known as',`<span style="font-weight:600;font-size:14px">${t.aka.join(', ')}</span>`]);
+  for(const [k,v] of Object.entries(t.glance)){ if(k!=='City Recommendations')gl.push([k,chipsH(v)]) }
+  if(t.glance['City Recommendations'])gl.push(['Recommended for',chipsH(t.glance['City Recommendations'])]);
+  const pd=t.details.map(([k,v])=>`<div class="gr"><span class="gt">${k}</span>${chipsH(v)}</div>`).join('');
+  const now=new Date().getMonth();
+  const season=t.season.length?`<div class="season">
+      <div class="row head"><span></span>${MONTHS.map((m,i)=>`<span class="mo ${i===now?'now':''}">${m}</span>`).join('')}</div>
+      ${t.season.map(r=>`<div class="row"><span class="lab">${r.part}${r.when?`<small>${r.when}</small>`:''}</span>
+        ${r.m.map(c=>`<span class="cell">${c.length?c.map(col=>`<span class="dot" style="background:${col}"></span>`).join(''):'<span class="none"></span>'}</span>`).join('')}</div>`).join('')}
+    </div><p class="season-note">ⓘ This is a general guide. When a plant flowers, fruits and colours up depends on the climate where you live and on the season.</p>`:'';
+  $('#dBody').innerHTML=`
+    <h2>${t.bot}</h2><div class="common">${t.com}</div>
+    ${size}
+    ${buy}
+    <div class="desc" style="margin-top:22px">${t.desc}</div>
+    ${gl.length?`<div class="glance">${gl.map(([k,v])=>`<div class="gr"><span class="gt">${k}</span><div style="flex:1">${v}</div></div>`).join('')}</div>`:''}
+    <div class="more-h">More about ${t.bot}</div>
+    ${pd?`<div class="sub-h">Plant Details</div><div class="pd">${pd}</div>`:''}
+    ${season?`<div class="sub-h">Seasonal Colour</div>${season}`:''}
+    <p class="note">Photos, details, grades &amp; prices from leafland.co.nz (Nov 2026). Promo discounts are prototype samples.</p>`;
+  $('#dActions').style.display=ok.length?'flex':'none';
+}
+function pickGrade(i){curGrade=i;renderDetail()}
+function setQty(d){curQty=Math.max(1,curQty+d);$('#dQty').textContent=curQty}
+function closeSheet(){$('#sheet').classList.remove('open');$('#sheetBg').classList.remove('open')}
+$('#sheetBg').onclick=closeSheet;
+$('#dFav').onclick=()=>{const id=current.id;
+  favs=favs.includes(id)?favs.filter(x=>x!==id):[...favs,id];persist();
+  $('#dFav').classList.toggle('on',favs.includes(id));toast(favs.includes(id)?'Saved to favourites':'Removed from favourites')};
+$('#dAdd').onclick=()=>{
+  if(curGrade<0||!current.grades[curGrade])return;
+  const ex=quote.find(q=>q.id===current.id&&q.grade===curGrade);
+  if(ex)ex.qty+=curQty;else quote.push({id:current.id,grade:curGrade,qty:curQty});
+  persist();toast(`Added ${curQty} × ${current.grades[curGrade].g} to quote list`);closeSheet();
+};
+
+/* ---------------- NAV ---------------- */
+function go(v,opts={}){
+  document.querySelectorAll('.view').forEach(e=>e.classList.remove('active'));
+  $('#v-'+v).classList.add('active');
+  document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('active',b.dataset.v===v||(v==='finder'&&b.dataset.v==='browse')));
+  $('#main').scrollTop=0;
+  if(v==='browse'){
+    if(opts.cat){filter.cat=opts.cat;filter.special=false}
+    if(opts.special){filter.special=true;filter.cat='all'}
+    renderChips();renderGrid();
+    if(opts.focus)setTimeout(()=>$('#q').focus(),150);
+  }
+  if(v==='saved')renderSaved();
+  if(v==='finder')renderFinder();
+  closeSheet();
+}
+document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{
+  if(b.dataset.v==='browse'){filter.cat='all';filter.special=false}
+  go(b.dataset.v)});
+$('#catChips').onclick=e=>{const b=e.target.closest('.chip');if(!b)return;
+  const c=b.dataset.c; if(c==='special'){filter.special=!filter.special;filter.cat='all'}else{filter.special=false;filter.cat=c}
+  renderChips();renderGrid()};
+$('#q').oninput=e=>{filter.q=e.target.value.trim();$('#qClear').style.display=filter.q?'block':'none';renderGrid()};
+$('#qClear').onclick=()=>{$('#q').value='';filter.q='';$('#qClear').style.display='none';renderGrid()};
+$('#sort').onchange=e=>{filter.sort=e.target.value;renderGrid()};
+document.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>{savedSeg=b.dataset.seg;renderSaved()});
+
+// Android hardware back button (Capacitor fires 'backbutton' via App plugin; fallback to history)
+function handleBack(){
+  if($('#modal').classList.contains('open')){$('#modal').classList.remove('open');return true}
+  if($('#sheet').classList.contains('open')){closeSheet();return true}
+  if(!$('#v-home').classList.contains('active')){go('home');return true}
+  return false;
+}
+try{
+  const App=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.App;
+  if(App)App.addListener('backButton',()=>{ if(!handleBack())App.exitApp() });
+}catch(e){}
+
+/* ---------------- MISC ---------------- */
+function persist(){store.set('favs',favs);store.set('quote',quote);store.set('ship',ship);updateDot()}
+function updateDot(){const n=quote.reduce((a,q)=>a+q.qty,0);const d=$('#qDot');d.textContent=n;d.style.display=n?'flex':'none'}
+let tt;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),2000)}
+function copyCode(c){try{navigator.clipboard.writeText(c)}catch(e){}toast('Promo code '+c+' copied')}
+function blocked(){$('#mTitle').textContent='Prototype only';$('#mText').textContent='Ordering is switched off in this prototype. No order or quote request has been sent.';$('#modal').classList.add('open')}
+function demo(m){$('#mTitle').textContent='Demo';$('#mText').textContent=m+'.';$('#modal').classList.add('open')}
+
+renderHome();renderPromos();updateDot();
+</script>
+</body>
+</html>
